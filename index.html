@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Finance Tracker</title>
+  <meta name="description" content="Track student spending with budgets, regex search and a weekly trend. Works offline in your browser.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles/main.css">
+  <script type="module" src="scripts/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <h1 class="brand">Student Finance Tracker</h1>
+    <nav aria-label="Main">
+      <ul class="nav-list">
+        <li><a href="#about">About</a></li>
+        <li><a href="#dashboard">Dashboard</a></li>
+        <li><a href="#records">Records</a></li>
+        <li><a href="#add">Add expense</a></li>
+        <li><a href="#settings">Settings</a></li>
+        <li><button type="button" id="theme-toggle" class="btn small" aria-pressed="false">Dark mode</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="cap-banner">
+    <p id="cap-polite" class="live live-polite" role="status" aria-live="polite" aria-atomic="true"></p>
+    <p id="cap-assertive" class="live live-assertive" role="alert" aria-live="assertive" aria-atomic="true"></p>
+  </div>
+
+  <main id="main" tabindex="-1">
+
+    <!-- ABOUT -->
+    <section id="about" class="view" aria-labelledby="about-h">
+      <h2 id="about-h" tabindex="-1">About</h2>
+      <p>Student Finance Tracker helps you see where your money goes. Add each expense, search your history with regex patterns, and set a spending cap that warns you before you overspend.</p>
+      <p>Everything is saved in your browser. Nothing is sent to a server. You can export your data to a JSON file and import it again later.</p>
+      <h3>Contact</h3>
+      <ul>
+        <li>GitHub: <a href="https://github.com/rruzigana-hub">github.com/rruzigana-hub</a></li>
+        <li>Email: <a href="mailto:r.ruzigana@alustudent.com">r.ruzigana@alustudent.com</a></li>
+      </ul>
+      <p class="hint">Built for the African Leadership University summative assignment: Building Responsive UI.</p>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="view" aria-labelledby="dashboard-h">
+      <h2 id="dashboard-h" tabindex="-1">Dashboard</h2>
+
+      <div class="stats">
+        <div class="stat">
+          <h3>Total records</h3>
+          <p id="stat-count" class="big">0</p>
+        </div>
+        <div class="stat">
+          <h3>Total spent</h3>
+          <p id="stat-sum" class="big">0</p>
+        </div>
+        <div class="stat">
+          <h3>Top category</h3>
+          <p id="stat-top" class="big">None yet</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Spending cap</h3>
+        <progress id="cap-progress" max="100" value="0" aria-label="Share of spending cap used"></progress>
+        <p id="cap-text">No cap set. Add one in Settings.</p>
+      </div>
+
+      <div class="panel">
+        <h3>Last 7 days</h3>
+        <ol id="trend" class="trend" aria-label="Spending per day for the last 7 days"></ol>
+        <p id="trend-total" class="hint"></p>
+      </div>
+    </section>
+
+    <!-- RECORDS -->
+    <section id="records" class="view" aria-labelledby="records-h">
+      <h2 id="records-h" tabindex="-1">Records</h2>
+
+      <form id="search-form" class="toolbar" role="search" aria-label="Search records" novalidate>
+        <div class="field grow">
+          <label for="search">Search with a regex pattern</label>
+          <input id="search" type="text" autocomplete="off" spellcheck="false" placeholder="Example: (coffee|tea)" aria-describedby="search-help search-msg">
+        </div>
+        <label class="check" for="search-ci"><input id="search-ci" type="checkbox" checked> Ignore case</label>
+      </form>
+      <p id="search-help" class="hint">Try <code>\.\d{2}\b</code> for cents, <code>(coffee|tea)</code> for drinks, or <code>\b(\w+)\s+\1\b</code> for repeated words.</p>
+      <p id="search-msg" class="search-msg" role="status" aria-live="polite"></p>
+
+      <div class="toolbar sort-bar">
+        <div class="field">
+          <label for="sort-key">Sort by</label>
+          <select id="sort-key">
+            <option value="date">Date</option>
+            <option value="description">Description</option>
+            <option value="amount">Amount</option>
+          </select>
+        </div>
+        <button type="button" id="sort-dir" class="btn"></button>
+      </div>
+
+      <p id="currency-note" class="hint"></p>
+
+      <div class="table-wrap">
+        <table id="records-table">
+          <caption class="sr-only">Your expenses</caption>
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Description</th>
+              <th scope="col">Category</th>
+              <th scope="col" class="num">Amount</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="records-body"></tbody>
+        </table>
+      </div>
+
+      <div id="empty" class="empty" hidden>
+        <p id="empty-text"></p>
+        <button type="button" id="empty-sample" class="btn primary" hidden>Load sample data</button>
+      </div>
+    </section>
+
+    <!-- ADD -->
+    <section id="add" class="view" aria-labelledby="add-h">
+      <h2 id="add-h" tabindex="-1">Add expense</h2>
+      <p class="hint" id="add-note"></p>
+      <form id="record-form" novalidate>
+        <div class="field">
+          <label for="f-description">Description</label>
+          <input id="f-description" name="description" type="text" autocomplete="off" aria-describedby="f-description-hint f-description-error">
+          <p class="hint" id="f-description-hint">Up to 80 characters. No spaces at the start or end.</p>
+          <p class="error" id="f-description-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="f-amount">Amount</label>
+          <input id="f-amount" name="amount" type="text" inputmode="decimal" autocomplete="off" aria-describedby="f-amount-hint f-amount-error">
+          <p class="hint" id="f-amount-hint">Numbers like 12 or 12.50. Up to 2 decimals.</p>
+          <p class="error" id="f-amount-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="f-category">Category</label>
+          <input id="f-category" name="category" type="text" list="category-list" autocomplete="off" aria-describedby="f-category-hint f-category-error">
+          <datalist id="category-list"></datalist>
+          <p class="hint" id="f-category-hint">Letters, spaces and hyphens only.</p>
+          <p class="error" id="f-category-error" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
+          <label for="f-date">Date</label>
+          <input id="f-date" name="date" type="text" inputmode="numeric" placeholder="YYYY-MM-DD" autocomplete="off" aria-describedby="f-date-hint f-date-error">
+          <p class="hint" id="f-date-hint">Use the format YYYY-MM-DD.</p>
+          <p class="error" id="f-date-error" aria-live="polite"></p>
+        </div>
+
+        <button type="submit" class="btn primary">Add expense</button>
+        <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="settings" class="view" aria-labelledby="settings-h">
+      <h2 id="settings-h" tabindex="-1">Settings</h2>
+
+      <div class="panel">
+        <h3>Show amounts in</h3>
+        <div class="field">
+          <label for="display-currency">Display currency</label>
+          <select id="display-currency"></select>
+        </div>
+      </div>
+
+      <form id="settings-form" novalidate>
+        <fieldset>
+          <legend>Currencies</legend>
+          <div class="field">
+            <label for="s-base">Base currency code</label>
+            <input id="s-base" type="text" maxlength="3" autocomplete="off" aria-describedby="s-base-hint s-base-error">
+            <p class="hint" id="s-base-hint">Amounts you enter are saved in this currency.</p>
+            <p class="error" id="s-base-error" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="s-cur1">Second currency code</label>
+            <input id="s-cur1" type="text" maxlength="3" autocomplete="off" aria-describedby="s-cur1-error">
+            <p class="error" id="s-cur1-error" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="s-rate1">Rate: 1 base = ? second currency</label>
+            <input id="s-rate1" type="text" inputmode="decimal" autocomplete="off" aria-describedby="s-rate1-error">
+            <p class="error" id="s-rate1-error" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="s-cur2">Third currency code</label>
+            <input id="s-cur2" type="text" maxlength="3" autocomplete="off" aria-describedby="s-cur2-error">
+            <p class="error" id="s-cur2-error" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="s-rate2">Rate: 1 base = ? third currency</label>
+            <input id="s-rate2" type="text" inputmode="decimal" autocomplete="off" aria-describedby="s-rate2-error">
+            <p class="error" id="s-rate2-error" aria-live="polite"></p>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Spending cap</legend>
+          <div class="field">
+            <label for="s-cap">Cap (in base currency)</label>
+            <input id="s-cap" type="text" inputmode="decimal" autocomplete="off" aria-describedby="s-cap-hint s-cap-error">
+            <p class="hint" id="s-cap-hint">Use 0 for no cap.</p>
+            <p class="error" id="s-cap-error" aria-live="polite"></p>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Categories</legend>
+          <div class="field">
+            <label for="s-categories">Category list</label>
+            <input id="s-categories" type="text" autocomplete="off" aria-describedby="s-categories-hint s-categories-error">
+            <p class="hint" id="s-categories-hint">Separate with commas. Example: Food, Books, Transport.</p>
+            <p class="error" id="s-categories-error" aria-live="polite"></p>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="btn primary">Save settings</button>
+        <p id="settings-status" class="form-status" role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="panel">
+        <h3>Your data</h3>
+        <div class="btn-row">
+          <button type="button" id="export-btn" class="btn">Export JSON</button>
+          <button type="button" id="import-btn" class="btn">Import JSON</button>
+          <input id="import-file" type="file" accept="application/json,.json" hidden>
+          <button type="button" id="sample-btn" class="btn">Load sample data</button>
+          <button type="button" id="clear-btn" class="btn danger">Delete all records</button>
+        </div>
+        <p id="data-status" class="form-status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>Student Finance Tracker. Your data stays in this browser.</p>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
