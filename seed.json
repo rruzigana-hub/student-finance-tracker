@@ -1,0 +1,14 @@
+[
+  {"id":"rec_0001","description":"Lunch at cafeteria","amount":12.50,"category":"Food","date":"2026-10-12","createdAt":"2026-10-12T08:30:00.000Z","updatedAt":"2026-10-12T08:30:00.000Z"},
+  {"id":"rec_0002","description":"Chemistry textbook","amount":89.99,"category":"Books","date":"2026-10-10","createdAt":"2026-10-10T09:00:00.000Z","updatedAt":"2026-10-10T09:00:00.000Z"},
+  {"id":"rec_0003","description":"Bus pass","amount":45.00,"category":"Transport","date":"2026-10-08","createdAt":"2026-10-08T07:15:00.000Z","updatedAt":"2026-10-08T07:15:00.000Z"},
+  {"id":"rec_0004","description":"Coffee coffee run","amount":8.75,"category":"Food","date":"2026-10-11","createdAt":"2026-10-11T10:20:00.000Z","updatedAt":"2026-10-11T10:20:00.000Z"},
+  {"id":"rec_0005","description":"Tea with study group","amount":3.20,"category":"Food","date":"2026-10-09","createdAt":"2026-10-09T15:45:00.000Z","updatedAt":"2026-10-09T15:45:00.000Z"},
+  {"id":"rec_0006","description":"Movie night","amount":15.00,"category":"Entertainment","date":"2026-10-07","createdAt":"2026-10-07T19:00:00.000Z","updatedAt":"2026-10-07T19:00:00.000Z"},
+  {"id":"rec_0007","description":"Leap day printing fee","amount":0.01,"category":"Fees","date":"2024-02-29","createdAt":"2024-02-29T12:00:00.000Z","updatedAt":"2024-02-29T12:00:00.000Z"},
+  {"id":"rec_0008","description":"Tuition installment","amount":2500.00,"category":"Fees","date":"2025-12-31","createdAt":"2025-12-31T09:00:00.000Z","updatedAt":"2025-12-31T09:00:00.000Z"},
+  {"id":"rec_0009","description":"New Year sale notebook","amount":4.99,"category":"Books","date":"2026-01-01","createdAt":"2026-01-01T11:00:00.000Z","updatedAt":"2026-01-01T11:00:00.000Z"},
+  {"id":"rec_0010","description":"Café ☕ latte & croissant","amount":6.40,"category":"Food","date":"2026-10-12","createdAt":"2026-10-12T09:10:00.000Z","updatedAt":"2026-10-12T09:10:00.000Z"},
+  {"id":"rec_0011","description":"Phone airtime","amount":10,"category":"Other","date":"2026-10-06","createdAt":"2026-10-06T18:00:00.000Z","updatedAt":"2026-10-06T18:00:00.000Z"},
+  {"id":"rec_0012","description":"<b>Bold</b> \"quoted\" test","amount":1.10,"category":"Other","date":"2026-10-10","createdAt":"2026-10-10T20:00:00.000Z","updatedAt":"2026-10-10T20:00:00.000Z"}
+]
