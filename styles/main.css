@@ -1,6 +1,6 @@
 /* Student Finance Tracker - mobile-first styles
    Breakpoints: base (<360px), 360px, 768px, 1024px */
-
+[hidden] { display: none !important; }
 :root {
   --bg: #eef3f5;
   --surface: #ffffff;
@@ -354,7 +354,7 @@ tr.editing input { max-width: 60%; min-height: 40px; }
   main { padding: 2rem 3rem; }
   .big { font-size: 2.1rem; }
   .trend { height: 12rem; gap: .6rem; }
-  #dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.2rem; }
+    #dashboard:not([hidden]) { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.2rem; }
   #dashboard:not([hidden]) { display: grid; }
   #dashboard > h2, #dashboard > .stats { grid-column: 1 / -1; }
 }
