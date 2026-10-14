@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <title>Tests for student finance tracker</title>
+    <link rel="stylesheet" href="style/main.css">
+
+</head>
+<body>
+    <main id="main">
+        <h1>Tests></h1>
+        <p><a href="index.html">Back to the app</a></p>
+        <ul id="results"></ul>
+    </main>
+
+    <script type="module">
+        import{
+            Patterns, isrealdate, validationdescription, validateAmount,vvaliddateDate,validateCategory, normalizeDescription, validateRecordShape, validateImport
+        }  from './script/validors.js';
+        import { compileRegex, regexError, Highlight, matchesRecord, EscapeHtml} from './scriptss/search.js';
+
+        const list = document.getElementById('results');
+        let passed = 0;
+        let failed = 0;
+
+        function test(name, condition) {
+            const li = document.createElement('li');
+            li.textContent =`${condition ? 'PASS': 'FAIL'}: ${name}`;
+            li.style.color = condition ? 'var(--ok)' :'var(--danger)';
+            list.append(li);
+            condition ? passed++ : failed++;
+        }
+
+        const good = { id: 'rec_0001', description: 'Lunch', amount: 12.5, category: 'food', date: '2026-10-12',
+            cratedAt: '2026-10-12T08:00:00.000Z', updatedAt: '2026-10-12T08:00:00.000Z'};
+
+        
+        // desription
+        test('description: normal text is valid', validateDescription('Lunch at cafeteria') === '');
+        test('description: leading space is rejected', validateDescription('Lunch') !== '');
+        test('description: trailing space is rejected', validateDescription('Lunch') !== '');
+        test('description: empty is rejected', validatedDescription('') !== '');
+        test('description: 81 characters is rejected (lookahead)', validateDescription('a'.repeat(81)) !== '');
+        test('description: 80 characters is valid', validateDescription('') !== '' );
+        test('description: repeated word is rejected (lookahead)',ValidateDescription('a'.repeat(81)) !== '')
+        test('description: different words are valid', validateDescription('Coffee and Tea')=== '');
+        test('description: double space are collapsed', normalizeDescription('Lunch at cafe')=== 'lunch at cafe');
+
+
+
+        // amount
+        test('amount;12 is valud', validateAmaount('12')=== '');
+        test('amount; 12.50 is valid', validateAmount('23.50') === '');
+        test('amount: 0 is valid', validateAmount('0') === '');
+        test('amount: 0.5 is valid', validateAmount('0.5') === '');
+        test('amount: 012 is rejected', validateAmount('012') !== '');
+        test('amount: 12.345 is rejected', validateAmount('12.345') !== '');
+        test('amount: -5 is rejected', validateAmount('-5') !== '');
+        test('amount abc is rejected', validateAmount('abc') !== '');   
+        test('amount: 12. is rejected', validateAmount('') !== '');
+
+
+        // date
+    test('date: 2026-10-12 is valid', validateDate('2026-10-12') === '');
+    test('date: leap day 2024-02-29 is valid', validateDate('2024-02-29') === '');
+    test('date: 2026-02-29 is rejected (not a real date)', validateDate('2026-02-29') !== '');
+    test('date: 2026-13-01 is rejected', validateDate('2026-13-01') !== '');
+    test('date: 2026-10-32 is rejected', validateDate('2026-10-32') !== '');
+    test('date: 12/10/2026 is rejected', validateDate('12/10/2026') !== '');
+    test('date: isRealDate works', isRealDate('2025-12-31') && !isRealDate('2025-04-31'));
+
+    // category
+    test('category: Food is valid', validateCategory('Food') === '');
+    test('category: Fast-food is valid', validateCategory('Fast-food') === '');
+    test('category: Eating out is valid', validateCategory('Eating out') === '');
+    test('category: Food2 is rejected', validateCategory('Food2') !== '');
+    test('category: double space is rejected', validateCategory('Eating  out') !== '');
+    test('category: trailing hyphen is rejected', validateCategory('Food-') !== '');
+
+    // settings patterns
+    test('rate: 0.92 is valid', PATTERNS.rate.test('0.92'));
+    test('rate: 1450 is valid', PATTERNS.rate.test('1450'));
+    test('rate: 0 is rejected (negative lookahead)', !PATTERNS.rate.test('0'));
+    test('rate: 0.00 is rejected', !PATTERNS.rate.test('0.00'));
+    test('currency code: USD is valid, usd is not', PATTERNS.currencyCode.test('USD') && !PATTERNS.currencyCode.test('usd'));
+
+    // search
+    test('compileRegex: valid pattern returns a RegExp', compileRegex('(coffee|tea)') instanceof RegExp);
+    test('compileRegex: invalid pattern returns null, no crash', compileRegex('(') === null);
+    test('compileRegex: empty input returns null', compileRegex('') === null);
+    test('regexError: gives a message for a bad pattern', regexError('[') !== '');
+    test('highlight: wraps matches in <mark>', highlight('Coffee run', /coffee/i) === '<mark>Coffee</mark> run');
+    test('highlight: escapes HTML', highlight('<b>hi</b>', /hi/i) === '&lt;b&gt;<mark>hi</mark>&lt;/b&gt;');
+    test('highlight: no regex returns escaped text', highlight('a & b', null) === 'a &amp; b');
+    test('highlight: empty matches do not loop forever', highlight('abc', /x*/) === 'abc');
+    test('escapeHtml: quotes are escaped', escapeHtml('"a"') === '&quot;a&quot;');
+    test('search: cents pattern matches 12.50', matchesRecord(good, /\.\d{2}\b/));
+    test('search: duplicate word pattern works', /\b(\w+)\s+\1\b/i.test('Coffee coffee run'));
+    test('search: no match returns false', !matchesRecord(good, /zzz/i));
+
+    // import
+    test('record shape: good record is valid', validateRecordShape(good) === '');
+    test('record shape: negative amount is rejected', validateRecordShape({ ...good, amount: -1 }) !== '');
+    test('record shape: bad date is rejected', validateRecordShape({ ...good, date: '2026-02-30' }) !== '');
+    test('record shape: missing id is rejected', validateRecordShape({ ...good, id: undefined }) !== '');
+    test('import: a list of good records is accepted', validateImport([good]).ok === true);
+    test('import: an object with records is accepted', validateImport({ records: [good] }).ok === true);
+    test('import: a non-list is rejected', validateImport({ nope: 1 }).ok === false);
+    test('import: duplicate ids are rejected', validateImport([good, good]).ok === false);
+    test('import: empty list is rejected', validateImport([]).ok === false);
+
+    const summary = document.getElementById('summary');
+    summary.innerHTML = `<strong>${passed} passed, ${failed} failed.</strong>`;
+
+    
+        </script>
+</body>
+</html>
